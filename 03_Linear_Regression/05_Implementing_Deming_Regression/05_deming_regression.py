@@ -16,6 +16,10 @@ from sklearn import datasets
 from tensorflow.python.framework import ops
 ops.reset_default_graph()
 
+# Set a random seed
+tf.set_random_seed(42)
+np.random.seed(42)
+
 # Create graph
 sess = tf.Session()
 
@@ -39,13 +43,13 @@ b = tf.Variable(tf.random_normal(shape=[1,1]))
 # Declare model operations
 model_output = tf.add(tf.matmul(x_data, A), b)
 
-# Declare Demming loss function
-demming_numerator = tf.abs(tf.subtract(y_target, tf.add(tf.matmul(x_data, A), b)))
-demming_denominator = tf.sqrt(tf.add(tf.square(A),1))
-loss = tf.reduce_mean(tf.truediv(demming_numerator, demming_denominator))
+# Declare Deming loss function
+deming_numerator = tf.abs(tf.subtract(y_target, tf.add(tf.matmul(x_data, A), b)))
+deming_denominator = tf.sqrt(tf.add(tf.square(A),1))
+loss = tf.reduce_mean(tf.truediv(deming_numerator, deming_denominator))
 
 # Declare optimizer
-my_opt = tf.train.GradientDescentOptimizer(0.1)
+my_opt = tf.train.GradientDescentOptimizer(0.15)
 train_step = my_opt.minimize(loss)
 
 # Initialize variables
@@ -54,14 +58,14 @@ sess.run(init)
 
 # Training loop
 loss_vec = []
-for i in range(250):
+for i in range(1000):
     rand_index = np.random.choice(len(x_vals), size=batch_size)
     rand_x = np.transpose([x_vals[rand_index]])
     rand_y = np.transpose([y_vals[rand_index]])
     sess.run(train_step, feed_dict={x_data: rand_x, y_target: rand_y})
     temp_loss = sess.run(loss, feed_dict={x_data: rand_x, y_target: rand_y})
     loss_vec.append(temp_loss)
-    if (i+1)%50==0:
+    if (i+1)%50 == 0:
         print('Step #' + str(i+1) + ' A = ' + str(sess.run(A)) + ' b = ' + str(sess.run(b)))
         print('Loss = ' + str(temp_loss))
 
@@ -78,8 +82,8 @@ for i in x_vals:
 plt.plot(x_vals, y_vals, 'o', label='Data Points')
 plt.plot(x_vals, best_fit, 'r-', label='Best fit line', linewidth=3)
 plt.legend(loc='upper left')
-plt.title('Sepal Length vs Pedal Width')
-plt.xlabel('Pedal Width')
+plt.title('Sepal Length vs Petal Width')
+plt.xlabel('Petal Width')
 plt.ylabel('Sepal Length')
 plt.show()
 

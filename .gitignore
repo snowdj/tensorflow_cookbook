@@ -1,15 +1,21 @@
 # Standard python gitignore file
 *.csv
 !/06_Neural_Networks/08_Learning_Tic_Tac_Toe/base_tic_tac_toe_moves.csv
+*.en
+*.de
 *.tsv
 *.Rdata
 *.rdata
 *.ppt
 *.pptx
+*.zip
+*.pb
 *.docx
 *.xls
 *.xlsx
 *.gz
+vocab2ix.json
+vocab2ix_dict.json
 .gitignore~
 .Rhistory
 Readme.md~
@@ -25,6 +31,8 @@ checkpoint
 *.pos
 **/temp/
 **/temp
+**/tmp/
+**/tmp
 */tensorboard_logs/*
 */tensorboard_logs/
 */tensorboard_logs
@@ -137,8 +145,13 @@ celerybeat-schedule
 venv/
 ENV/
 
-# Spyder project settings
+# Spyder/pycharm project settings
 .spyderproject
+.idea/
 
 # Rope project settings
 .ropeproject
+
+# Ignore data sources
+*/MNIST_data/*
+*/birthweight_data/*

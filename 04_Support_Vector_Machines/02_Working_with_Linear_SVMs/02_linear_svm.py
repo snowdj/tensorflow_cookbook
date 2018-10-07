@@ -20,6 +20,10 @@ from sklearn import datasets
 from tensorflow.python.framework import ops
 ops.reset_default_graph()
 
+# Set random seeds
+np.random.seed(7)
+tf.set_random_seed(7)
+
 # Create graph
 sess = tf.Session()
 
@@ -31,7 +35,7 @@ y_vals = np.array([1 if y == 0 else -1 for y in iris.target])
 
 # Split data into train/test sets
 train_indices = np.random.choice(len(x_vals),
-                                 round(len(x_vals)*0.8),
+                                 int(round(len(x_vals)*0.9)),
                                  replace=False)
 test_indices = np.array(list(set(range(len(x_vals))) - set(train_indices)))
 x_vals_train = x_vals[train_indices]
@@ -40,7 +44,7 @@ y_vals_train = y_vals[train_indices]
 y_vals_test = y_vals[test_indices]
 
 # Declare batch size
-batch_size = 100
+batch_size = 135
 
 # Initialize placeholders
 x_data = tf.placeholder(shape=[None, 2], dtype=tf.float32)
@@ -134,8 +138,8 @@ plt.plot(not_setosa_x, not_setosa_y, 'x', label='Non-setosa')
 plt.plot(x1_vals, best_fit, 'r-', label='Linear Separator', linewidth=3)
 plt.ylim([0, 10])
 plt.legend(loc='lower right')
-plt.title('Sepal Length vs Pedal Width')
-plt.xlabel('Pedal Width')
+plt.title('Sepal Length vs Petal Width')
+plt.xlabel('Petal Width')
 plt.ylabel('Sepal Length')
 plt.show()
 

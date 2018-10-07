@@ -66,12 +66,12 @@ def snn(address1, address2, dropout_keep_prob,
     #   in this case, the dot product of the norms is the same.
     dot_prod = tf.reduce_sum(tf.multiply(output1, output2), 1)
     
-    return(dot_prod)
+    return dot_prod
 
 
 def get_predictions(scores):
     predictions = tf.sign(scores, name="predictions")
-    return(predictions)
+    return predictions
 
 
 def loss(scores, y_target, margin):
@@ -114,7 +114,7 @@ def loss(scores, y_target, margin):
     
     # Average loss over batch
     avg_loss = tf.reduce_mean(total_loss)
-    return(avg_loss)
+    return avg_loss
 
 
 def accuracy(scores, y_target):
@@ -127,4 +127,4 @@ def accuracy(scores, y_target):
     predictions_int = tf.cast(tf.sign(predictions), tf.int32)
     correct_predictions = tf.equal(predictions_int, y_target_int)
     accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
-    return(accuracy)
+    return accuracy

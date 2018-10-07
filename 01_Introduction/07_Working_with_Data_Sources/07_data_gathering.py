@@ -6,7 +6,6 @@
 
 # Data Gathering
 import matplotlib.pyplot as plt
-import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import ops
 ops.reset_default_graph()
@@ -34,14 +33,11 @@ print(len(birth_data[0]))
 
 
 # Housing Price Data
-import requests
-
-housing_url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data'
+from keras.datasets import boston_housing
+(x_train, y_train), (x_test, y_test) = boston_housing.load_data()
 housing_header = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT', 'MEDV']
-housing_file = requests.get(housing_url)
-housing_data = [[float(x) for x in y.split(' ') if len(x)>=1] for y in housing_file.text.split('\n') if len(y)>=1]
-print(len(housing_data))
-print(len(housing_data[0]))
+print(x_train.shape[0])
+print(x_train.shape[1])
 
 
 # MNIST Handwriting Data
@@ -64,11 +60,10 @@ print(mnist.train.labels[1,:])
 
 print(X_train.shape)
 print(y_train.shape)
-print(y_train[0,]) # this is a frog
+print(y_train[0,])  # this is a frog
 
 # Plot the 0-th image (a frog)
 from PIL import Image
-%matplotlib inline
 img = Image.fromarray(X_train[0,:,:,:])
 plt.imshow(img)
 

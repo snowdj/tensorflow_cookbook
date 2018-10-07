@@ -2,8 +2,6 @@
 
 # [TensorFlow Machine Learning Cookbook](https://www.packtpub.com/big-data-and-business-intelligence/tensorflow-machine-learning-cookbook)
 
-## (Code is slowly becoming TensorFlow-v1.0.1 compliant.)
-
 ## [A Packt Publishing Book](https://www.packtpub.com/big-data-and-business-intelligence/tensorflow-machine-learning-cookbook)
 
 ### By Nick McClure
@@ -253,7 +251,7 @@ This chapter shows how to implement various SVM methods with TensorFlow.  We fir
 ## [Ch 5: Nearest Neighbor Methods](05_Nearest_Neighbor_Methods#ch-5-nearest-neighbor-methods)
 <kbd>
   <a href="05_Nearest_Neighbor_Methods/01_Introduction#nearest-neighbor-methods-introduction">
-    <img src="05_Nearest_Neighbor_Methods/images/image.png" align="center" height="45" width="90">
+    <img src="05_Nearest_Neighbor_Methods/images/nearest_neighbor_intro.jpg" align="center" height="45" width="90">
   </a>
 </kbd>
 <kbd>
@@ -583,3 +581,7 @@ To illustrate how versatile TensorFlow is, we will show additional examples in t
   * How to use TensorFlow to do k-means clustering.  We use the Iris data set, set k=3, and use k-means to make predictions.
  4. [Solving a System of ODEs](11_More_with_TensorFlow/04_Solving_A_System_of_ODEs#solving-a-system-of-odes)
   * Here, we show how to use TensorFlow to solve a system of ODEs.  The system of concern is the Lotka-Volterra predator-prey system.
+ 5. [Using a Random Forest](11_More_with_TensorFlow/05_Using_a_Random_Forest#using-a-random-forest)
+  * We illustrate how to use TensorFlow's gradient boosted regression and classification trees.
+ 6. [Using TensorFlow with Keras](11_More_with_TensorFlow/06_Using_TensorFlow_with_Keras#using-tensorflow-with-keras)
+  * Here we show how to use the Keras sequential model building for a fully connected neural network and a CNN model with callbacks.

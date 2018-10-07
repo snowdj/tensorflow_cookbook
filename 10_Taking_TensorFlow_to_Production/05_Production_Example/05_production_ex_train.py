@@ -6,11 +6,12 @@
 #    of best tensorflow production tips
 #
 # The example we will productionalize is the spam/ham RNN
-#    from 
+#    from Chapter 9 (RNNs), section 2
 
 import os
 import re
 import io
+import sys
 import requests
 import numpy as np
 import tensorflow as tf
@@ -19,18 +20,18 @@ from tensorflow.python.framework import ops
 ops.reset_default_graph()
 
 # Define App Flags
-tf.app.flags.DEFINE_string("storage_folder", "temp", "Where to store model and data.")
-tf.app.flags.DEFINE_float('learning_rate', 0.0005, 'Initial learning rate.')
-tf.app.flags.DEFINE_float('dropout_prob', 0.5, 'Per to keep probability for dropout.')
-tf.app.flags.DEFINE_integer('epochs', 20, 'Number of epochs for training.')
-tf.app.flags.DEFINE_integer('batch_size', 250, 'Batch Size for training.')
-tf.app.flags.DEFINE_integer('max_sequence_length', 20, 'Max sentence length in words.')
-tf.app.flags.DEFINE_integer('rnn_size', 15, 'RNN feature size.')
-tf.app.flags.DEFINE_integer('embedding_size', 25, 'Word embedding size.')
-tf.app.flags.DEFINE_integer('min_word_frequency', 20, 'Word frequency cutoff.')
-tf.app.flags.DEFINE_boolean('run_unit_tests', False, 'If true, run tests.')
+tf.flags.DEFINE_string("storage_folder", "temp", "Where to store model and data.")
+tf.flags.DEFINE_float('learning_rate', 0.0005, 'Initial learning rate.')
+tf.flags.DEFINE_float('dropout_prob', 0.5, 'Per to keep probability for dropout.')
+tf.flags.DEFINE_integer('epochs', 20, 'Number of epochs for training.')
+tf.flags.DEFINE_integer('batch_size', 250, 'Batch Size for training.')
+tf.flags.DEFINE_integer('rnn_size', 15, 'RNN feature size.')
+tf.flags.DEFINE_integer('embedding_size', 25, 'Word embedding size.')
+tf.flags.DEFINE_integer('min_word_frequency', 20, 'Word frequency cutoff.')
+tf.flags.DEFINE_boolean('run_unit_tests', False, 'If true, run tests.')
 
-FLAGS = tf.app.flags.FLAGS
+FLAGS = tf.flags.FLAGS
+
 
 # Define how to get data
 def get_data(storage_folder=FLAGS.storage_folder, data_file="text_data.txt"):
@@ -49,7 +50,7 @@ def get_data(storage_folder=FLAGS.storage_folder, data_file="text_data.txt"):
         file = z.read('SMSSpamCollection')
         # Format Data
         text_data = file.decode()
-        text_data = text_data.encode('ascii',errors='ignore')
+        text_data = text_data.encode('ascii', errors='ignore')
         text_data = text_data.decode().split('\n')
 
         # Save data to text file
@@ -63,10 +64,10 @@ def get_data(storage_folder=FLAGS.storage_folder, data_file="text_data.txt"):
             for row in file_conn:
                 text_data.append(row)
         text_data = text_data[:-1]
-    text_data = [x.split('\t') for x in text_data if len(x)>=1]
+    text_data = [x.split('\t') for x in text_data if len(x) >= 1]
     [y_data, x_data] = [list(x) for x in zip(*text_data)]
     
-    return(x_data, y_data)
+    return x_data, y_data
 
 
 # Create a text cleaning function
@@ -74,7 +75,7 @@ def clean_text(text_string):
     text_string = re.sub(r'([^\s\w]|_|[0-9])+', '', text_string)
     text_string = " ".join(text_string.split())
     text_string = text_string.lower()
-    return(text_string)
+    return text_string
 
 
 # Test clean_text function
@@ -87,15 +88,15 @@ class clean_test(tf.test.TestCase):
             test_out = clean_text(test_input)
             self.assertEqual(test_expected, test_out)
 
+
 # Define RNN Model
-def rnn_model(x_data_ph, max_sequence_length, vocab_size, embedding_size,
-              rnn_size, dropout_keep_prob):
+def rnn_model(x_data_ph, vocab_size, embedding_size, rnn_size, dropout_keep_prob):
     # Create embedding
     embedding_mat = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0))
     embedding_output = tf.nn.embedding_lookup(embedding_mat, x_data_ph)
 
     # Define the RNN cell
-    cell = tf.contrib.rnn.BasicRNNCell(num_units = rnn_size)
+    cell = tf.contrib.rnn.BasicRNNCell(num_units=rnn_size)
     output, state = tf.nn.dynamic_rnn(cell, embedding_output, dtype=tf.float32)
     output = tf.nn.dropout(output, dropout_keep_prob)
 
@@ -103,12 +104,11 @@ def rnn_model(x_data_ph, max_sequence_length, vocab_size, embedding_size,
     output = tf.transpose(output, [1, 0, 2])
     last = tf.gather(output, int(output.get_shape()[0]) - 1)
 
-
     weight = tf.Variable(tf.truncated_normal([rnn_size, 2], stddev=0.1))
     bias = tf.Variable(tf.constant(0.1, shape=[2]))
     logits_out = tf.matmul(last, weight) + bias
     
-    return(logits_out)
+    return logits_out
 
 
 # Define accuracy function
@@ -117,7 +117,8 @@ def get_accuracy(logits, actuals):
     batch_acc = tf.equal(tf.argmax(logits, 1), tf.cast(actuals, tf.int64))
     # Convert logical to float
     batch_acc = tf.cast(batch_acc, tf.float32)
-    return(batch_acc)
+    return batch_acc
+
 
 # Define main program
 def main(args):
@@ -136,7 +137,6 @@ def main(args):
     run_unit_tests = FLAGS.run_unit_tests
     epochs = FLAGS.epochs
     batch_size = FLAGS.batch_size
-    max_sequence_length = FLAGS.max_sequence_length
     rnn_size = FLAGS.rnn_size
     embedding_size = FLAGS.embedding_size
     min_word_frequency = FLAGS.min_word_frequency
@@ -148,6 +148,9 @@ def main(args):
     x_data = [clean_text(x) for x in x_data]
 
     # Change texts into numeric vectors
+    # Set a max sequence length for speeding up the computations.
+    # But we can easily set "max_sequence_length = max([len(x) for x in x_data])" as well.
+    max_sequence_length = 20
     vocab_processor = tf.contrib.learn.preprocessing.VocabularyProcessor(max_sequence_length,
                                                                          min_frequency=min_word_frequency)
     text_processed = np.array(list(vocab_processor.fit_transform(x_data)))
@@ -157,7 +160,7 @@ def main(args):
     
     # Shuffle and split data
     text_processed = np.array(text_processed)
-    y_data = np.array([1 if x=='ham' else 0 for x in y_data])
+    y_data = np.array([1 if x == 'ham' else 0 for x in y_data])
     shuffled_ix = np.random.permutation(np.arange(len(y_data)))
     x_shuffled = text_processed[shuffled_ix]
     y_shuffled = y_data[shuffled_ix]
@@ -176,8 +179,7 @@ def main(args):
         dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
 
         # Define Model
-        rnn_model_outputs = rnn_model(x_data_ph, max_sequence_length, vocab_size,
-                                      embedding_size, rnn_size, dropout_keep_prob)
+        rnn_model_outputs = rnn_model(x_data_ph, vocab_size, embedding_size, rnn_size, dropout_keep_prob)
 
         # Prediction
         # Although we won't use the following operation, we declare and name
@@ -229,7 +231,7 @@ def main(args):
                 # Run train step
                 train_dict = {x_data_ph: x_train_batch,
                               y_output_ph: y_train_batch,
-                              dropout_keep_prob:0.5}
+                              dropout_keep_prob: 0.5}
                 _, summary = sess.run([train_step, summary_op], feed_dict=train_dict)
                 
                 summary_writer = tf.summary.FileWriter('tensorboard')
@@ -238,7 +240,7 @@ def main(args):
             # Run loss and accuracy for training
             temp_train_loss, temp_train_acc = sess.run([loss, accuracy], feed_dict=train_dict)
 
-            test_dict = {x_data_ph: x_test, y_output_ph: y_test, dropout_keep_prob:1.0}
+            test_dict = {x_data_ph: x_test, y_output_ph: y_test, dropout_keep_prob: 1.0}
             temp_test_loss, temp_test_acc = sess.run([loss, accuracy], feed_dict=test_dict)
             
             # Print Epoch Summary
@@ -248,11 +250,13 @@ def main(args):
             # Save model every epoch
             saver.save(sess, os.path.join(storage_folder, "model.ckpt"))
 
+
 # Run main module/tf App
 if __name__ == "__main__":
-    if FLAGS.run_unit_tests:
+    cmd_args = sys.argv
+    if len(cmd_args) > 1 and cmd_args[1] == 'test':
         # Perform unit tests
-        tf.test.main()
+        tf.test.main(argv=cmd_args[1:])
     else:
-        # Run evaluation
-        tf.app.run()
+        # Run TF App
+        tf.app.run(main=None, argv=cmd_args)
